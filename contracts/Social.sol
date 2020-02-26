@@ -1,9 +1,9 @@
-pragma solidity ^0.4.25;
+pragma solidity ^0.5.16;
 
 contract Social {
 
     event FriendshipCreated(address person1, address person2);
-    event MoneySent(address person1, address person2, uint amount_sent, uint amount_received)
+    event MoneySent(address person1, address person2, uint amount_sent, uint amount_received);
 
     struct FriendshipStruct {
         address person1;
@@ -11,49 +11,49 @@ contract Social {
     }
 
 
-    friendship[] friendships;
+    FriendshipStruct[] friendships;
     mapping(address => bool) knownPerson;
     address contractOwner;
-    uint commissiPPercent = 15;
+    uint comissionPercent = 15;
 
 
     constructor() public {
-        contractMaster = msg.sender;
+        contractOwner = msg.sender;
     }
 
     function createFriendship(address person1, address person2) public {
 
-        require(msg.sender == ContractMaster || msg.sender == person1 || msg.sender == person2)
-        require(_isKnownPerson(person1) && _isKnonwnPerson(person2));
+        require(msg.sender == contractOwner || msg.sender == person1 || msg.sender == person2);
+        require(_isKnownPerson(person1) && _isKnownPerson(person2));
         require(!_areFriends(person1, person2));
 
         FriendshipStruct memory friendship;
         friendship.person1 = person1;
         friendship.person2 = person2;
         friendships.push(friendship);
-        emit FriendshipCreated(person1, person2)
+        emit FriendshipCreated(person1, person2);
 
     }
 
     function addPerson(address person) public {
-        require(msg.sender == ContractMaster || msg.sender == person)
-        require(knownPerson[person] == false)
+        require(msg.sender == contractOwner || msg.sender == person);
+        require(knownPerson[person] == false);
         knownPerson[person] = true;
     }
 
-    function sendMomey(address sender, address receiver) payable {
+    function sendMomey(address sender, address payable receiver) payable public {
 
-        require(_isKnownPerson(person1) && _isKnonwnPerson(person2));
-        require(_areFriends(person1, person2));
+        require(_isKnownPerson(sender) && _isKnownPerson(receiver));
+        require(_areFriends(sender, receiver));
         require(msg.value > 0.00);
 
-        send_value = msg.value / 100 * (100 - commissionPercent);
+        uint send_value = msg.value / 100 * (100 - comissionPercent);
         receiver.transfer(send_value);
 
-        emit MoneySent(sender, receiver, msg.value, send_value)
+        emit MoneySent(sender, receiver, msg.value, send_value);
     }
 
-    function _isKnownPerson(address person) internal returns (bool){
+    function _isKnownPerson(address person) internal view returns (bool){
         return knownPerson[person];
     }
 
@@ -68,9 +68,9 @@ contract Social {
         return are_friends;
     }
 
-    function withdrawCommisions(address the_beneficary) {
+    function withdrawCommisions(address payable the_beneficary) public {
         require (msg.sender == contractOwner);
-        the_beneficary.transfer(this.balance);
+        the_beneficary.transfer(address(this).balance);
     }
 
 }
