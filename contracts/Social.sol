@@ -23,9 +23,9 @@ contract Social {
 
     function createFriendship(address person1, address person2) public {
 
-        require(msg.sender == contractOwner || msg.sender == person1 || msg.sender == person2);
-        require(_isKnownPerson(person1) && _isKnownPerson(person2));
-        require(!_areFriends(person1, person2));
+        require(_isKnownPerson(person1) && _isKnownPerson(person2), "To interact with the app both of the persons must be added to it with addPerson(address) function!");
+        require(msg.sender == contractOwner || msg.sender == person1 || msg.sender == person2, "To create friendship, you must be one of the persons.");
+        require(!_areFriends(person1, person2), "They already friends!");
 
         FriendshipStruct memory friendship;
         friendship.person1 = person1;
@@ -36,21 +36,22 @@ contract Social {
     }
 
     function addPerson(address person) public {
-        require(msg.sender == contractOwner || msg.sender == person);
-        require(knownPerson[person] == false);
+        require(msg.sender == contractOwner || msg.sender == person, "You can add only yourself!");
+        require(knownPerson[person] == false, "You are already added to the app!");
         knownPerson[person] = true;
     }
 
-    function sendMomey(address sender, address payable receiver) payable public {
+    function sendMomey(address payable receiver) payable public {
 
-        require(_isKnownPerson(sender) && _isKnownPerson(receiver));
-        require(_areFriends(sender, receiver));
+        require(_isKnownPerson(msg.sender), "You must be added to the app to interact with it! Use addPerson(address) function!");
+        require(_isKnownPerson(receiver), "Receiver of the money must be added to the app before you can send him/her a money!");
+        require(_areFriends(msg.sender, receiver), "You can send money only to your friends!");
         require(msg.value > 0.00);
 
         uint send_value = msg.value / 100 * (100 - comissionPercent);
         receiver.transfer(send_value);
 
-        emit MoneySent(sender, receiver, msg.value, send_value);
+        emit MoneySent(msg.sender, receiver, msg.value, send_value);
     }
 
     function _isKnownPerson(address person) internal view returns (bool){
