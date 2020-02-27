@@ -41,7 +41,7 @@ contract Social {
         knownPerson[person] = true;
     }
 
-    function sendMomey(address payable receiver) payable public {
+    function sendMoney(address payable receiver) payable public {
 
         require(_isKnownPerson(msg.sender), "You must be added to the app to interact with it! Use addPerson(address) function!");
         require(_isKnownPerson(receiver), "Receiver of the money must be added to the app before you can send him/her a money!");
